@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Agent Test</title>
+    <style>
+        * {
+            margin: 1;
+            padding: 3;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #848ba9 0%, #af5063 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgb(62, 59, 62);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(96, 57, 57, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #dbdbdb;
+            margin-bottom: 50px;
+            font-size: 25px;
+        }
+
+        .status {
+            padding: 13px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .status.disconnected {
+            background: #fee;
+            color: #c33;
+            border: 2px solid #fcc;
+        }
+
+        .status.connected {
+            background: #efe;
+            color: #3c3;
+            border: 2px solid #cfc;
+        }
+
+        .status.connecting {
+            background: #ffc;
+            color: #993;
+            border: 2px solid #fec;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-connect {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-connect:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-disconnect {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-disconnect:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-mic {
+            background: #27ae60;
+            color: white;
+            font-size: 18px;
+        }
+
+        .btn-mic:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-mic.recording {
+            background: #e74c3c;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .info {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+        }
+
+        .log-entry.error {
+            border-left-color: #e74c3c;
+            color: #c0392b;
+        }
+
+        .log-entry.success {
+            border-left-color: #27ae60;
+            color: #229954;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Voice Agent Test</h1>
+        <p class="subtitle">HR Assistant Voice Interface</p>
+        
+        <div id="status" class="status disconnected">
+            Disconnected
+        </div>
+
+        <div class="controls">
+            <button id="connectBtn" class="btn-connect">Connect to Server</button>
+            <button id="disconnectBtn" class="btn-disconnect" disabled>Disconnect</button>
+            <button id="micBtn" class="btn-mic" disabled> Start Recording</button>
+        </div>
+
+        <div class="info">
+            <div class="info-item">
+                <span class="info-label">Server:</span>
+                <span id="serverUrl">ws://localhost:5000</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Audio Format:</span>
+                <span>μ-law 8kHz</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Stream ID:</span>
+                <span id="streamId">-</span>
+            </div>
+        </div>
+
+        <div class="log" id="log">
+            <div class="log-entry">System ready. Click "Connect" to start.</div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let mediaRecorder = null;
+        let audioContext = null;
+        let isRecording = false;
+        let streamId = null;
+
+        const statusDiv = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const micBtn = document.getElementById('micBtn');
+        const streamIdSpan = document.getElementById('streamId');
+        const logDiv = document.getElementById('log');
+
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(state) {
+            statusDiv.className = `status ${state}`;
+            switch(state) {
+                case 'connected':
+                    statusDiv.textContent = '🟢 Connected';
+                    break;
+                case 'connecting':
+                    statusDiv.textContent = '🟡 Connecting...';
+                    break;
+                case 'disconnected':
+                    statusDiv.textContent = '⚫ Disconnected';
+                    break;
+            }
+        }
+
+        connectBtn.addEventListener('click', async () => {
+            try {
+                updateStatus('connecting');
+                log('Connecting to WebSocket server...');
+                
+                ws = new WebSocket('ws://localhost:5000');
+                
+                ws.onopen = () => {
+                    updateStatus('connected');
+                    log('Connected successfully!', 'success');
+                    
+                    
+                    streamId = 'stream_' + Math.random().toString(36).substr(2, 9);
+                    streamIdSpan.textContent = streamId;
+                    
+                    
+                    const startMsg = {
+                        event: 'start',
+                        start: {
+                            streamSid: streamId,
+                            customParameters: {}
+                        }
+                    };
+                    ws.send(JSON.stringify(startMsg));
+                    log('Start message sent');
+                    
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                    micBtn.disabled = false;
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log(`Received: ${data.event || 'media'}`, 'success');
+                        
+                        if (data.event === 'media' && data.media) {
+                           
+                            log('Audio data received');
+                        }
+                    } catch (e) {
+                        log('Binary data received');
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    log('WebSocket error occurred', 'error');
+                    console.error(error);
+                };
+
+                ws.onclose = () => {
+                    updateStatus('disconnected');
+                    log('Connection closed');
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    micBtn.disabled = true;
+                    streamIdSpan.textContent = '-';
+                };
+
+            } catch (error) {
+                log(`Connection error: ${error.message}`, 'error');
+                updateStatus('disconnected');
+            }
+        });
+
+        disconnectBtn.addEventListener('click', () => {
+            if (ws) {
+                const stopMsg = {
+                    event: 'stop'
+                };
+                ws.send(JSON.stringify(stopMsg));
+                ws.close();
+                log('Disconnecting...');
+            }
+        });
+
+        micBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    log('Requesting microphone access...');
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            sampleRate: 8000,
+                            channelCount: 1,
+                            echoCancellation: true,
+                            noiseSuppression: true
+                        } 
+                    });
+                    
+                    audioContext = new AudioContext({ sampleRate: 8000 });
+                    const source = audioContext.createMediaStreamSource(stream);
+                    const processor = audioContext.createScriptProcessor(4096, 1, 1);
+                    
+                    processor.onaudioprocess = (e) => {
+                        if (ws && ws.readyState === WebSocket.OPEN) {
+                            const inputData = e.inputBuffer.getChannelData(0);
+                            
+                            // Convert to μ-law (simplified version)
+                            const mulawData = new Uint8Array(inputData.length);
+                            for (let i = 0; i < inputData.length; i++) {
+                                const sample = Math.max(-1, Math.min(1, inputData[i]));
+                                mulawData[i] = linearToMulaw(sample);
+                            }
+                            
+                            const payload = btoa(String.fromCharCode(...mulawData));
+                            const mediaMsg = {
+                                event: 'media',
+                                media: {
+                                    track: 'inbound',
+                                    payload: payload
+                                }
+                            };
+                            
+                            ws.send(JSON.stringify(mediaMsg));
+                        }
+                    };
+                    
+                    source.connect(processor);
+                    processor.connect(audioContext.destination);
+                    
+                    isRecording = true;
+                    micBtn.textContent = 'Stop Recording';
+                    micBtn.classList.add('recording');
+                    log('Recording started', 'success');
+                    
+                } catch (error) {
+                    log(`Microphone error: ${error.message}`, 'error');
+                }
+            } else {
+                if (audioContext) {
+                    audioContext.close();
+                }
+                isRecording = false;
+                micBtn.textContent = 'Start Recording';
+                micBtn.classList.remove('recording');
+                log('Recording stopped');
+            }
+        });
+
+        // Simple μ-law encoding
+        function linearToMulaw(sample) {
+            const BIAS = 0x84;
+            const CLIP = 32635;
+            const sign = (sample < 0) ? 0x80 : 0;
+            sample = Math.abs(sample * 32768);
+            if (sample > CLIP) sample = CLIP;
+            sample += BIAS;
+            let exponent = 7;
+            for (let i = 0; i < 8; i++) {
+                if (sample <= (0x1F << (i + 3))) {
+                    exponent = i;
+                    break;
+                }
+            }
+            const mantissa = (sample >> (exponent + 3)) & 0x0F;
+            return ~(sign | (exponent << 4) | mantissa) & 0xFF;
+        }
+    </script>
+</body>
+</html>

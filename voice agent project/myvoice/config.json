@@ -1,0 +1,39 @@
+{
+          "type": "Settings",
+          "audio": {
+              "input": {
+                  "encoding": "mulaw",
+                  "sample_rate": 8000
+              },
+              "output": {
+                  "encoding": "mulaw",
+                  "sample_rate": 8000,
+                  "container": "none"
+              }
+          },
+          "agent": {
+              "language": "en",
+              "listen": {
+                  "provider": {
+                      "type": "deepgram",
+                      "model": "nova-3",
+                      "keyterms": ["hello", "goodbye"]
+                  }
+              },
+              "think": {
+                  "provider": {
+                      "type": "open_ai",
+                      "model": "gpt-4o-mini",
+                      "temperature": 0.7
+                  },
+                  "prompt": "You are a professional HR assistant. You can collect candidate information, answer questions about vacancies, the hiring process and company policies, schedule interviews, and update candidate status in the HR system. IMPORTANT: Always ask candidates to clearly state their full name. If a name is unclear, ask the candidate to spell it out letter by letter. Carefully collect and verify all candidate details. Before proceeding with any action, confirm all information, including the candidate’s full name, the position applied for, and contact details. Maintain a professional, neutral, and respectful tone at all times. Do not make hiring decisions; your role is strictly to assist and coordinate the HR process."
+              },
+              "speak": {
+                  "provider": {
+                      "type": "deepgram",
+                      "model": "aura-2-thalia-en"
+                  }
+              },
+              "greeting": "“Hello! How can I assist you today regarding our vacancies or hiring process?”"
+          }
+      }
