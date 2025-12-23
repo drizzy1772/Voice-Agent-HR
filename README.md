@@ -11,13 +11,6 @@ Deepgram API - Speech-to-text (Nova-3) and text-to-speech (Aura-2-Thalia)
 OpenAI GPT-4o-mini - Natural language processing and conversation logic
 μ-law Audio Encoding - 8kHz audio format for telephony integration
 
-voice agent project/myvoice/
-├── main.py              # WebSocket server and audio streaming logic
-├── config.json          # Agent configuration (models, prompts, audio settings)
-├── templates/
-│   └── index.html       # Web interface for testing the voice agent
-├── pyproject.toml       # Project dependencies
-└── .env                 # API keys (not included, see setup)
 
 🚀 Setup
 
